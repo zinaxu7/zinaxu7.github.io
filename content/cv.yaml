@@ -1,0 +1,43 @@
+# CV page. Each section below becomes one card, in this order.
+# The full CV as a PDF goes at content/cv.pdf; the download button appears once that file exists.
+#
+# A section has a title and either:
+#   entries: dated rows (education, jobs, awards). location and details are optional.
+#   items:   label / value rows (skills, languages).
+
+- title: Education
+  entries:
+    - period: 2022 – 2027
+      title: PhD, Health Informatics
+      place: Your University
+      location: City, Country
+      details:
+        - 'Dissertation: placeholder title'
+        - 'Advisor: Prof. Name'
+    - period: 2020 – 2022
+      title: MS, Your Field
+      place: Your University
+      location: City, Country
+
+- title: Experience
+  entries:
+    - period: 2022 – present
+      title: Graduate Research Assistant
+      place: Your Lab, Your University
+      details:
+        - One line on what you did and what came of it.
+
+- title: Honors and awards
+  entries:
+    - period: '2025'
+      title: Placeholder award
+      place: Awarding organization
+
+- title: Skills
+  items:
+    - label: Qualitative methods
+      value: Semi-structured interviews, thematic analysis, co-design workshops
+    - label: Design
+      value: User-centered design, prototyping, usability evaluation
+    - label: Data
+      value: Knowledge representation, R, Python

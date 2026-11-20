@@ -1,0 +1,32 @@
+# One entry per paper. `id` becomes the BibTeX citation key, so keep it unique.
+# Required: id, title, authors, venue, year.
+# Optional: type (article | inproceedings | incollection | misc), abbr (short venue badge, e.g. JAMIA),
+#   abstract, doi, pdf, url, code, slides, poster, note, featured.
+# pdf / slides / poster take a full URL, or a file you put in content/papers/, written as papers/my-paper.pdf.
+# These two entries are placeholders. Replace them with your own papers.
+
+- id: yourname2026example
+  title: 'Example journal article title: replace with your own paper'
+  authors: ['Your Name', 'Second Author', 'Senior Author']
+  venue: 'Journal Name'
+  abbr: 'JRNL'
+  year: 2026
+  type: article
+  featured: true
+  doi: ''
+  pdf: ''
+  abstract: >
+    Placeholder abstract. Write three to five sentences covering the problem,
+    the method, the main findings, and why they matter. Visitors open this by
+    clicking "Abstract" under the entry.
+
+- id: yourname2025example
+  title: 'Example conference paper title: replace with your own paper'
+  authors: ['First Author', 'Your Name', 'Senior Author']
+  venue: 'Proceedings of the Conference Name'
+  abbr: 'CONF'
+  year: 2025
+  type: inproceedings
+  note: 'Placeholder entry'
+  abstract: >
+    Placeholder abstract for a conference paper.

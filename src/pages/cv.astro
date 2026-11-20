@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { getSite } from '../lib/site';
+import { fileUrl, hasFile } from '../lib/files';
+
+const site = await getSite();
+const cv = (await getCollection('cv')).map((s) => s.data).sort((a, b) => a.order - b.order);
+// The download button only shows once content/cv.pdf exists.
+const pdf = hasFile('cv.pdf') ? fileUrl('cv.pdf') : undefined;
+---
+
+<Base title="CV" description={`Curriculum vitae of ${site.name}.`}>
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-4xl font-semibold">CV</h1>
+    {
+      pdf && (
+        <a href={pdf} download="cv.pdf" class="rounded bg-accent px-3 py-1.5 text-sm font-medium text-paper">
+          Download PDF
+        </a>
+      )
+    }
+  </div>
+
+  {
+    cv.map((section) => (
+      <section class="mt-8 overflow-hidden rounded-lg border border-line bg-card shadow-sm">
+        <h2 class="border-b border-line px-5 py-3 font-sans text-lg font-semibold">{section.title}</h2>
+        {section.entries && (
+          <ul class="divide-y divide-line">
+            {section.entries.map((e) => (
+              <li class="grid gap-x-5 gap-y-2 px-5 py-4 sm:grid-cols-[8.5rem_1fr]">
+                <div>
+                  <span class="inline-block rounded bg-accent px-2 py-0.5 text-xs font-semibold text-paper">
+                    {e.period}
+                  </span>
+                  {e.location && <p class="mt-1.5 text-xs text-muted">{e.location}</p>}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-semibold leading-snug">{e.title}</p>
+                  <p class="text-sm text-muted">{e.place}</p>
+                  {e.details && (
+                    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                      {e.details.map((d) => (
+                        <li>{d}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {section.items && (
+          <dl class="divide-y divide-line">
+            {section.items.map((i) => (
+              <div class="grid gap-x-5 gap-y-1 px-5 py-3 sm:grid-cols-[8.5rem_1fr]">
+                <dt class="text-sm font-semibold">{i.label}</dt>
+                <dd class="text-sm">{i.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </section>
+    ))
+  }
+
+  <p class="mt-8 text-sm text-muted">
+    Publications are listed on the <a href="/publications/" class="text-accent underline">Publications</a> page.
+  </p>
+</Base>

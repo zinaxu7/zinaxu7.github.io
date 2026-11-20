@@ -1,0 +1,153 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import { siGithub, siGooglescholar, siOrcid } from 'simple-icons';
+import Base from '../layouts/Base.astro';
+import PubItem from '../components/PubItem.astro';
+import { getSite } from '../lib/site';
+
+const site = await getSite();
+const { Content: Bio } = await render(site.entry);
+
+const featured = (await getCollection('publications'))
+  .filter((p) => p.data.featured)
+  .sort((a, b) => b.data.year - a.data.year);
+const posts = (await getCollection('blog', (p) => !p.data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'short', day: 'numeric' });
+
+// Icon buttons under the hero text. A link left empty in content/about.md is skipped.
+const social = [
+  { label: 'Google Scholar', href: site.links.scholar, path: siGooglescholar.path },
+  { label: 'ORCID', href: site.links.orcid, path: siOrcid.path },
+  { label: 'GitHub', href: site.links.github, path: siGithub.path },
+  { label: 'LinkedIn', href: site.links.linkedin, text: 'in' },
+].filter((s) => s.href);
+const iconBtn =
+  'flex h-10 w-10 items-center justify-center rounded-full border border-line bg-card text-muted transition hover:-translate-y-0.5 hover:border-accent hover:text-accent';
+---
+
+<Base>
+  <section slot="hero" class="hero-bg border-b border-line">
+    <div class="mx-auto flex max-w-4xl flex-col-reverse items-center gap-10 px-5 py-14 sm:flex-row sm:py-20">
+      <div class="flex-1 text-center sm:text-left">
+        <p class="fade-up text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+          {site.role} · {site.affiliation}
+        </p>
+        <h1 class="fade-up mt-3 text-5xl font-semibold leading-[1.05] sm:text-6xl" style="--d: 0.08s">
+          <span class="gradient-text">{site.name}</span>
+        </h1>
+        <p class="fade-up mt-5 font-serif text-xl leading-relaxed sm:text-2xl" style="--d: 0.16s">{site.tagline}</p>
+        <div class="fade-up mt-7 flex flex-wrap items-center justify-center gap-3 sm:justify-start" style="--d: 0.24s">
+          <a
+            href={`mailto:${site.email}`}
+            class="rounded-full bg-accent px-5 py-2 text-sm font-medium text-paper shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            Email me
+          </a>
+          <a
+            href="/cv/"
+            class="rounded-full border border-line bg-card px-5 py-2 text-sm font-medium transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
+          >
+            View CV
+          </a>
+          {
+            social.map((s) => (
+              <a href={s.href} class={iconBtn} aria-label={s.label} title={s.label} rel="me noopener">
+                {s.path ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d={s.path} />
+                  </svg>
+                ) : (
+                  <span class="text-sm font-bold" aria-hidden="true">
+                    {s.text}
+                  </span>
+                )}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+      <div class="avatar-ring fade-up h-40 w-40 shrink-0 sm:h-52 sm:w-52">
+        <div class="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-paper">
+          {
+            site.photo ? (
+              <Image src={site.photo} alt={site.name} width={416} height={416} fit="cover" loading="eager" class="h-full w-full object-cover" />
+            ) : (
+              <span class="font-serif text-5xl text-accent sm:text-6xl" aria-hidden="true">
+                {site.initials}
+              </span>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal grid gap-10 md:grid-cols-[1.6fr_1fr]">
+    <div>
+      <h2 class="text-2xl font-semibold">About me</h2>
+      <div class="prose mt-4">
+        <Bio />
+      </div>
+    </div>
+    <div>
+      <h2 class="text-2xl font-semibold">Research interests</h2>
+      <ul class="mt-4 flex flex-wrap gap-2 text-sm">
+        {
+          site.interests.map((i) => (
+            <li class="rounded-full border border-line bg-card px-3 py-1 transition hover:border-accent hover:text-accent">
+              {i}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    featured.length > 0 && (
+      <section class="reveal mt-14">
+        <div class="flex items-baseline justify-between gap-4">
+          <h2 class="text-2xl font-semibold">Selected publications</h2>
+          <a href="/publications/" class="shrink-0 text-sm text-accent hover:underline">
+            All publications →
+          </a>
+        </div>
+        <ul class="mt-2 divide-y divide-line">
+          {featured.map((p) => (
+            <PubItem id={p.id} pub={p.data} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    posts.length > 0 && (
+      <section class="reveal mt-14">
+        <div class="flex items-baseline justify-between gap-4">
+          <h2 class="text-2xl font-semibold">Recent writing</h2>
+          <a href="/blog/" class="shrink-0 text-sm text-accent hover:underline">
+            All posts →
+          </a>
+        </div>
+        <ul class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((p) => (
+            <li>
+              <a
+                href={`/blog/${p.id}/`}
+                class="block h-full rounded-lg border border-line bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-md"
+              >
+                <time class="text-xs text-muted">{fmt(p.data.pubDate)}</time>
+                <p class="mt-1 font-semibold leading-snug">{p.data.title}</p>
+                <p class="mt-2 text-sm leading-relaxed text-muted">{p.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>

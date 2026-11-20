@@ -1,0 +1,92 @@
+---
+// One publication entry, laid out like al-folio: venue badge on the left,
+// title / authors / venue on the right, then a row of buttons.
+import { getSite } from '../lib/site';
+import { fileUrl } from '../lib/files';
+import { toBibtex } from '../lib/bibtex';
+
+const site = await getSite();
+
+const { id, pub } = Astro.props;
+const doiUrl = pub.doi ? `https://doi.org/${pub.doi}` : undefined;
+const btn =
+  'rounded border border-accent px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-accent transition hover:bg-accent hover:text-paper aria-expanded:bg-accent aria-expanded:text-paper';
+const links = [
+  ['PDF', fileUrl(pub.pdf)],
+  ['DOI', doiUrl],
+  ['Code', pub.code],
+  ['Slides', fileUrl(pub.slides)],
+  ['Poster', fileUrl(pub.poster)],
+  ['Link', pub.url],
+].filter(([, href]) => href);
+---
+
+<li class="grid gap-x-5 gap-y-2 py-5 sm:grid-cols-[5.5rem_1fr]" data-pub>
+  <div class:list={[!pub.abbr && 'hidden sm:block']}>
+    {
+      pub.abbr && (
+        <span class="inline-block rounded bg-accent px-2 py-1 text-center text-xs font-semibold uppercase tracking-wide text-paper sm:block">
+          {pub.abbr}
+        </span>
+      )
+    }
+  </div>
+  <div class="min-w-0">
+    <p class="font-semibold leading-snug">{pub.title}</p>
+    <p class="mt-1 text-sm">
+      {
+        pub.authors.map((a: string, i: number) => (
+          <>
+            {a === site.authorName ? <strong class="underline decoration-accent decoration-2">{a}</strong> : a}
+            {i < pub.authors.length - 1 ? ', ' : ''}
+          </>
+        ))
+      }
+    </p>
+    <p class="mt-1 text-sm text-muted">
+      <em>{pub.venue}</em>, {pub.year}
+      {pub.note && <span> · {pub.note}</span>}
+    </p>
+
+    <div class="mt-2.5 flex flex-wrap gap-2">
+      {
+        pub.abstract && (
+          <button type="button" class={btn} data-pub-toggle="abs" aria-expanded="false">
+            Abs
+          </button>
+        )
+      }
+      <button type="button" class={btn} data-pub-toggle="bib" aria-expanded="false">Bib</button>
+      {links.map(([label, href]) => <a href={href} class={btn}>{label}</a>)}
+    </div>
+
+    {
+      pub.abstract && (
+        <p class="mt-3 rounded border border-line bg-card p-3 text-sm leading-relaxed" data-pub-panel="abs" hidden>
+          {pub.abstract}
+        </p>
+      )
+    }
+    <pre
+      class="mt-3 overflow-x-auto rounded border border-line bg-card p-3 text-xs"
+      data-pub-panel="bib"
+      hidden>{toBibtex(id, pub)}</pre>
+  </div>
+</li>
+
+<script>
+  // Abs / Bib buttons open one panel at a time within their entry.
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-pub-toggle]');
+    if (!btn) return;
+    const item = btn.closest('[data-pub]')!;
+    const name = btn.dataset.pubToggle;
+    item.querySelectorAll<HTMLElement>('[data-pub-panel]').forEach((panel) => {
+      panel.hidden = panel.dataset.pubPanel !== name || !panel.hidden;
+    });
+    item.querySelectorAll<HTMLElement>('[data-pub-toggle]').forEach((b) => {
+      const panel = item.querySelector<HTMLElement>(`[data-pub-panel="${b.dataset.pubToggle}"]`)!;
+      b.setAttribute('aria-expanded', String(!panel.hidden));
+    });
+  });
+</script>
